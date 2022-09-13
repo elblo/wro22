@@ -1,0 +1,8 @@
+# Ignora archivos del sistema Mac 
+.DS_store
+
+# Ignora la carpeta node_modules (por si usamos node al final para la competición)
+node_modules
+
+# Ignora los archivos relacionados a API keys
+.env
