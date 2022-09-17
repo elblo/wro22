@@ -16,7 +16,7 @@ fw.offset = 0
 fw.turn(90)
 
 # Variables para giros
-anguloRecto = 85
+anguloRecto = 87
 anguloGiroIzq = 45
 anguloGiroDcha = 135
 distanciaGiro = 180
@@ -91,30 +91,30 @@ def giroDcha():
         #bw.backward() 
         time.sleep(0.5) 
     # Movimiento recto para cuadrarse durante 4 * 0,5 = 2 segundos
-    for x in range(3):
-        fw.turn(anguloRecto)
-        # Adelante
-        #bw.speed = motor_speed
-        #bw.backward()
-        time.sleep(0.6) 
+#     for x in range(3):
+#         fw.turn(anguloRecto)
+#         # Adelante
+#         #bw.speed = motor_speed
+#         #bw.backward()
+#         time.sleep(0.6) 
 
 # Giro izquierda
 def giroIzq():
     print("Gira a izquierda")
     # Inicia giro a izquierda
-    for x in range(2):
+    for x in range(3):
         fw.turn(anguloGiroIzq)
         # Adelante
         #bw.speed = motor_speed
         #bw.backward()
-        time.sleep(0.5) 
+        time.sleep(0.4) 
     # Movimiento recto para cuadrarse durante 4 * 0,5 = 2 segundos
-    for x in range(3):
-        fw.turn(anguloRecto)
-        # Adelante
-        #bw.speed = motor_speed
-        #bw.backward()
-        time.sleep(0.6) 
+#     for x in range(3):
+#         fw.turn(anguloRecto)
+#         # Adelante
+#         #bw.speed = motor_speed
+#         #bw.backward()
+#         time.sleep(0.6) 
 
 # Movimiento recto corrigiendo dirección
 def recto(disDer, disIzq):
@@ -133,7 +133,7 @@ def recto(disDer, disIzq):
 # Movimiento recto con referencia exterior IZQUIERDA
 def rectoSensorIzq(disLeftPrevious, disLeftNow):
     # Corregir posición --> sensor izquierdo
-    correcionPosicion = disLeftPrevious - disLeftNow
+    correccionPosicion = (disLeftPrevious - disLeftNow) * 2
     print("Corrección izquierda: %.1f cm" % correccionPosicion)
     # Giro corregido
     fw.turn(anguloRecto + correccionPosicion)
@@ -141,11 +141,10 @@ def rectoSensorIzq(disLeftPrevious, disLeftNow):
 # Movimiento recto con referencia exterior DERECHA
 def rectoSensorDcha(disRightPrevious, disRightNow):
     # Corregir posición --> sensor derecho
-    correcionPosicion = disRightNow - disRightPrevious
+    correccionPosicion = (disRightNow - disRightPrevious) * 2
     print("Corrección derecha: %.1f cm" % correccionPosicion)
     # Giro corregido
     fw.turn(anguloRecto + correccionPosicion)
-    
     
 # Función con el código principal a ejecutar 
 def loop():
@@ -165,6 +164,7 @@ def loop():
             
             direccion = ""
 
+            decimasRecto = -1
             # 3 vueltas = 12 giros
             giros = 0
             while giros < 12:
@@ -183,31 +183,35 @@ def loop():
                         print("Dirección DERECHA")
 
                 # Giro a izquierda 
-                if (disLeftNow > distanciaGiro) and (direccion == "izquierda"):
+                if (disLeftNow > distanciaGiro) and (direccion == "izquierda") and (decimasRecto < 0):
                     giroIzq()                
-                    giros = giros + 1 
+                    giros = giros + 1
+                    decimasRecto = 18
             
                 # Giro a derecha
-                elif (disRightNow > distanciaGiro) and (direccion == "derecha"):
+                elif (disRightNow > distanciaGiro) and (direccion == "derecha") and (decimasRecto < 0):
                     giroDcha()
                     giros = giros + 1
+                    decimasRecto = 18
                       
                 # Coche va recto
                 else:                
                     #recto(disRightNow, disLeftNow)
                     if direccion == "izquierda" or direccion == "":
-                        rectoSensorIzq(disLeftPrevious, disLeftNow)
-                    if direccion == "derecha":
                         rectoSensorDcha(disRightPrevious, disRightNow)
+                    if direccion == "derecha":
+                        rectoSensorIzq(disLeftPrevious, disLeftNow)
                         
-
                 ###
+                decimasRecto = decimasRecto - 1
                 print("Giros: " + str(giros))
                 disLeftPrevious = disLeftNow
                 disRightPrevious = disRightNow
                 time.sleep(0.1)
             
             # Al finalizar los 12 giros (3 vueltas) paramos a la espera de pulsar el botón de nuevo para empezar
+            fw.turn(anguloRecto)
+            time.sleep(1.0)
             bw.stop()
 
 
